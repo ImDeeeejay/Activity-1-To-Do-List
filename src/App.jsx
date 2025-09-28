@@ -1,13 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 export default function ToDoList() {
   const [task, setTask] = useState("");
   const [tasks, setTasks] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const addTask = () => {
+  const addTask = (isImportant) => {
     if (task.trim() !== "") {
-      setTasks([...tasks, { text: task, status: "ongoing" }]);
+      setTasks([
+        ...tasks,
+        { text: task, status: isImportant ? "important" : "ongoing" },
+      ]);
       setTask("");
+      setIsModalOpen(false);
     }
   };
 
@@ -34,15 +39,14 @@ export default function ToDoList() {
           return (
             <li
               key={i}
-              className="flex justify-between bg-gray-900 p-3 rounded gap-4"
+              className="flex justify-between bg-gray-900 p-3 rounded gap-4 items-start"
             >
               <span
-                className={`flex items-center gap-2 flex-1 break-words ${
-                  t.status === "completed" ? "line-through text-gray-400" : ""
-                }`}
+                className={`flex-1 break-words overflow-hidden ${t.status === "completed" ? "line-through text-gray-400" : ""}`}
               >
-                {t.text}
+                {t.status === "completed" && "✅"} {t.text}
               </span>
+
 
               <div className="flex flex-col gap-2 shrink-0">
                 {t.status === "completed" ? (
@@ -54,22 +58,23 @@ export default function ToDoList() {
                   </button>
                 ) : (
                   <>
-                    {status !== "important" && (
-                      <button
-                        className="px-2 py-1 border border-red-500 text-red-400 rounded hover:bg-red-600 hover:text-white text-sm font-serif"
-                        onClick={() => updateStatus(idx, "important")}
-                      >
-                        Important
-                      </button>
+                    {status === "ongoing" || status === "important" ? null : (
+                      <>
+                        <button
+                          className="px-2 py-1 border border-red-500 text-red-400 rounded hover:bg-red-600 hover:text-white text-sm font-serif"
+                          onClick={() => updateStatus(idx, "important")}
+                        >
+                          Important
+                        </button>
+                        <button
+                          className="px-2 py-1 border border-yellow-500 text-yellow-400 rounded hover:bg-yellow-600 hover:text-white text-sm font-serif"
+                          onClick={() => updateStatus(idx, "ongoing")}
+                        >
+                          Ongoing
+                        </button>
+                      </>
                     )}
-                    {status !== "ongoing" && (
-                      <button
-                        className="px-2 py-1 border border-yellow-500 text-yellow-400 rounded hover:bg-yellow-600 hover:text-white text-sm font-serif"
-                        onClick={() => updateStatus(idx, "ongoing")}
-                      >
-                        Ongoing
-                      </button>
-                    )}
+
                     <button
                       className="px-2 py-1 bg-green-600 rounded hover:bg-green-700 text-sm font-serif"
                       onClick={() => updateStatus(idx, "completed")}
@@ -101,17 +106,53 @@ export default function ToDoList() {
             className="flex-1 px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white focus:outline-none font-serif"
           />
           <button
-            onClick={addTask}
+            onClick={() => task.trim() && setIsModalOpen(true)}
             className="px-4 py-2 bg-indigo-500 rounded hover:bg-indigo-600 font-serif"
           >
             Add
           </button>
         </div>
 
+        {isModalOpen && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
+            <div className="bg-gray-900/70 border border-gray-700 p-6 rounded-lg shadow-xl w-80 backdrop-blur-sm text-center">
+              <h2 className="text-xl font-bold mb-4 font-serif">
+                Mark as Important?
+              </h2>
+              <div className="flex justify-center gap-4">
+                <button
+                  onClick={() => addTask(true)}
+                  className="px-4 py-2 bg-red-500/90 rounded hover:bg-red-600 font-serif"
+                >
+                  Yes
+                </button>
+                <button
+                  onClick={() => addTask(false)}
+                  className="px-4 py-2 bg-gray-600/80 rounded hover:bg-gray-700 font-serif"
+                >
+                  No
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
-          <TaskList title="Ongoing Tasks" status="ongoing" color="text-yellow-400" />
-          <TaskList title="Important Tasks" status="important" color="text-red-400" />
-          <TaskList title="Completed Tasks" status="completed" color="text-green-400" />
+          <TaskList
+            title="Ongoing Tasks"
+            status="ongoing"
+            color="text-yellow-400"
+          />
+          <TaskList
+            title="Important Tasks"
+            status="important"
+            color="text-red-400"
+          />
+          <TaskList
+            title="Completed Tasks"
+            status="completed"
+            color="text-green-400"
+          />
         </div>
       </div>
     </div>
